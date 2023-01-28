@@ -33,14 +33,15 @@
 #define SECONDARY_SENSOR_IN  A1
 #define SECONDARY_SENSOR_OUT 4
 
+#define RED_INDEX   0
+#define GREEN_INDEX 1
+#define BLUE_INDEX  2
 
 
 byte step_delay = 15;
 byte strobe_delay = 0;
 
-byte current_red   = 255;
-byte current_green = 255;
-byte current_blue  = 255;
+byte current_rgb[3] = {255, 255, 255};
 
 byte counter = 0;
 byte check_sensors_about_every = 10;
@@ -50,34 +51,47 @@ void debug_values() {
     if(DEBUG) {
         char buff[20];
         sprintf(buff, "(%d, %d, %d)",
-                current_red, current_green, current_blue);
-        Serial.print(buff);
+                current_rgb[RED_INDEX],
+                current_rgb[GREEN_INDEX],
+                current_rgb[BLUE_INDEX]);
+        Serial.println(buff);
     }
 }
 
-void RGB_color(int rval, int gval, int bval) {
-    analogWrite(RED_LED, rval);
-    analogWrite(GREEN_LED, gval);
-    analogWrite(BLUE_LED, bval);
+
+void write_RGB_colors() {
+    analogWrite(RED_LED,   current_rgb[RED_INDEX]);
+    analogWrite(GREEN_LED, current_rgb[GREEN_INDEX]);
+    analogWrite(BLUE_LED,  current_rgb[BLUE_INDEX]);
     if (counter % check_sensors_about_every == 0) {
         update_step_delay();
         update_strobe_delay();
     }
+    debug_values();
+}
+
+void write_RGB_zeroes() {
+    analogWrite(RED_LED,   0);
+    analogWrite(GREEN_LED, 0);
+    analogWrite(BLUE_LED,  0);
 }
 
 void update_step_delay() {
+    // TODO: !!! put on one line
     int sensorValue = analogRead(PRIMARY_SENSOR_IN);
     step_delay = map(sensorValue, 0, 1023, 1, 200);
 }
 
 void update_strobe_delay() {
+    // TODO: !!! put on one line
     int sensorValue = analogRead(SECONDARY_SENSOR_IN);
     strobe_delay = map(sensorValue, 0, 1023, 0, 255);
 }
 
 void do_strobe_delay() {
     if (strobe_delay > 27) {
-        RGB_color(0, 0, 0);
+        // TODO: fix
+        write_RGB_zeroes();
         delay(strobe_delay);
     }
 }
@@ -85,55 +99,19 @@ void do_strobe_delay() {
 
 /* ----------------------------------- */
 
-void bring_down_red() {
-    while (current_red >= STEP_DELTA) {
-        current_red = current_red - STEP_DELTA;
-        RGB_color(current_red, current_green, current_blue);
+void bring_down_color(byte color_index) {
+    while (current_rgb[color_index] >= STEP_DELTA) {
+        current_rgb[color_index] = current_rgb[color_index] - STEP_DELTA;
+        write_RGB_colors();
         delay(step_delay);
         do_strobe_delay();
     }
 }
 
-void bring_up_red() {
-    while (current_red <= (255 - STEP_DELTA)) {
-        current_red = current_red + STEP_DELTA;
-        RGB_color(current_red, current_green, current_blue);
-        delay(step_delay);
-        do_strobe_delay();
-    }
-}
-
-void bring_down_green() {
-    while (current_green >= STEP_DELTA) {
-        current_green = current_green - STEP_DELTA;
-        RGB_color(current_red, current_green, current_blue);
-        delay(step_delay);
-        do_strobe_delay();
-    }
-}
-
-void bring_up_green() {
-    while (current_green <= (255 - STEP_DELTA)) {
-        current_green = current_green + STEP_DELTA;
-        RGB_color(current_red, current_green, current_blue);
-        delay(step_delay);
-        do_strobe_delay();
-    }
-}
-
-void bring_down_blue() {
-    while (current_blue >= STEP_DELTA) {
-        current_blue = current_blue - STEP_DELTA;
-        RGB_color(current_red, current_green, current_blue);
-        delay(step_delay);
-        do_strobe_delay();
-    }
-}
-
-void bring_up_blue() {
-    while (current_blue <= (255 - STEP_DELTA)) {
-        current_blue = current_blue + STEP_DELTA;
-        RGB_color(current_red, current_green, current_blue);
+void bring_up_color(byte color_index) {
+    while (current_rgb[color_index] <= (255 - STEP_DELTA)) {
+        current_rgb[color_index] = current_rgb[color_index] + STEP_DELTA;
+        write_RGB_colors();
         delay(step_delay);
         do_strobe_delay();
     }
@@ -147,7 +125,7 @@ void setup() {
     pinMode(BLUE_LED, OUTPUT);
     pinMode(SECONDARY_SENSOR_OUT, OUTPUT);
     pinMode(PRIMARY_SENSOR_OUT, OUTPUT);
-    RGB_color(current_red, current_green, current_blue);
+    write_RGB_colors();
     digitalWrite(PRIMARY_SENSOR_OUT, HIGH);
     digitalWrite(SECONDARY_SENSOR_OUT, HIGH);
     #if DEBUG
@@ -158,28 +136,29 @@ void setup() {
 void loop() {
 
     // first pattern
-    bring_down_red();
-    bring_down_green();
-    bring_up_red();
-    bring_down_blue();
-    bring_up_green();
-    bring_up_blue();
+    bring_down_color(RED_INDEX);
+    bring_down_color(GREEN_INDEX);
+    bring_up_color(RED_INDEX);
+    bring_down_color(BLUE_INDEX);
+    bring_up_color(GREEN_INDEX);
+    bring_up_color(BLUE_INDEX);
 
     // second pattern
-    bring_down_green();
-    bring_down_blue();
-    bring_up_green();
-    bring_down_red();
-    bring_up_blue();
-    bring_up_red();
+    bring_down_color(GREEN_INDEX);
+    bring_down_color(BLUE_INDEX);
+    bring_up_color(GREEN_INDEX);
+    bring_down_color(RED_INDEX);
+    bring_up_color(BLUE_INDEX);
+    bring_up_color(RED_INDEX);
 
     // third pattern
-    bring_down_blue();
-    bring_down_red();
-    bring_up_blue();
-    bring_down_green();
-    bring_up_red();
-    bring_up_green();
+    bring_down_color(BLUE_INDEX);
+    bring_down_color(RED_INDEX);
+    bring_up_color(BLUE_INDEX);
+    bring_down_color(GREEN_INDEX);
+    bring_up_color(RED_INDEX);
+    bring_up_color(GREEN_INDEX);
 }
+
 
 
