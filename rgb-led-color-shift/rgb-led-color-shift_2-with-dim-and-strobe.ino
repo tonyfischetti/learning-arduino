@@ -4,6 +4,9 @@
  * POTENTIAL IMPROVEMENTS                               *
  *                                                      *
  *                                                      *
+ *   - Use different resistors for each channel,        *
+ *     (255, 255, 255) should be neutral white          *
+ *     (not very light cyan)                            *
  *   - Add dimming potentiometer                        *
  *   - Power more than one RGB LED                      *
  *   - Use a power supply and a resistor                *
@@ -42,7 +45,7 @@ byte current_rgb[3] = {255, 255, 255};
 
 // holds the index (into pattern_functions) for the current
 // pattern's function pointer
-byte current_pattern_fun_index = 0;
+byte current_pattern_fun_index = 1;
 
 // counter of steps. will overflow. that's ok
 byte counter = 0;
@@ -202,9 +205,10 @@ void solid_color_pattern() {
     update_primary_sensor = update_red_brightness;
     update_secondary_sensor = update_green_brightness;
 
-    current_rgb[0] = 255;
-    current_rgb[1] = 255;
-    current_rgb[2] = 255;
+    // TODO: do this in setup
+    //current_rgb[0] = 255;
+    //current_rgb[1] = 255;
+    //current_rgb[2] = 255;
     write_RGB_colors();
 
     delay(100);
@@ -235,9 +239,12 @@ void setup() {
 
 void loop() {
 
+    // am I gonna have to use `volatile` since this will
+    // be updated in an interrupt?
     pattern_functions[current_pattern_fun_index]();
 
 }
+
 
 
 
