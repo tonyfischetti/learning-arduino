@@ -5,15 +5,9 @@
  *                                                      *
  *                                                      *
  *   - Add dimming potentiometer                        *
- *   - Don't analog read _every_ step                   *
  *   - Power more than one RGB LED                      *
  *   - Use a power supply and a resistor                *
- *   - Use smaller data types (maybe bytes)             *
- *   - Avoid function call to debug if no debug?        *
  *   - Switch to turn off some colors?                  *
- *   - Parameterize step_delta?                         *
- *   - Refactoring (maybe DRY with bring down/up        *
- *     for each color                                   *
  *                                                      *
  ********************************************************/
 
@@ -47,16 +41,16 @@ byte counter = 0;
 byte check_sensors_about_every = 10;
 
 
+#if DEBUG
 void debug_values() {
-    if(DEBUG) {
-        char buff[20];
-        sprintf(buff, "(%d, %d, %d)",
-                current_rgb[RED_INDEX],
-                current_rgb[GREEN_INDEX],
-                current_rgb[BLUE_INDEX]);
-        Serial.println(buff);
-    }
+    char buff[20];
+    sprintf(buff, "(%d, %d, %d)",
+            current_rgb[RED_INDEX],
+            current_rgb[GREEN_INDEX],
+            current_rgb[BLUE_INDEX]);
+    Serial.println(buff);
 }
+#endif
 
 
 void write_RGB_colors() {
@@ -67,7 +61,9 @@ void write_RGB_colors() {
         update_step_delay();
         update_strobe_delay();
     }
+    #if DEBUG
     debug_values();
+    #endif
 }
 
 void write_RGB_zeroes() {
@@ -123,11 +119,11 @@ void setup() {
     pinMode(RED_LED, OUTPUT);
     pinMode(GREEN_LED, OUTPUT);
     pinMode(BLUE_LED, OUTPUT);
+    digitalWrite(PRIMARY_SENSOR_OUT, HIGH);
+    digitalWrite(SECONDARY_SENSOR_OUT, HIGH);
     pinMode(SECONDARY_SENSOR_OUT, OUTPUT);
     pinMode(PRIMARY_SENSOR_OUT, OUTPUT);
     write_RGB_colors();
-    digitalWrite(PRIMARY_SENSOR_OUT, HIGH);
-    digitalWrite(SECONDARY_SENSOR_OUT, HIGH);
     #if DEBUG
     Serial.begin(9600);
     #endif
@@ -158,6 +154,7 @@ void loop() {
     bring_down_color(GREEN_INDEX);
     bring_up_color(RED_INDEX);
     bring_up_color(GREEN_INDEX);
+
 }
 
 
