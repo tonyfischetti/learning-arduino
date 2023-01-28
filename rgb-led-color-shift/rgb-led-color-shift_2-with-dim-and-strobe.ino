@@ -73,15 +73,11 @@ void write_RGB_zeroes() {
 }
 
 void update_step_delay() {
-    // TODO: !!! put on one line
-    int sensorValue = analogRead(PRIMARY_SENSOR_IN);
-    step_delay = map(sensorValue, 0, 1023, 1, 200);
+    step_delay = map(analogRead(PRIMARY_SENSOR_IN), 0, 1023, 1, 200);
 }
 
 void update_strobe_delay() {
-    // TODO: !!! put on one line
-    int sensorValue = analogRead(SECONDARY_SENSOR_IN);
-    strobe_delay = map(sensorValue, 0, 1023, 0, 255);
+    strobe_delay = map(analogRead(SECONDARY_SENSOR_IN), 0, 1023, 0, 255);
 }
 
 void do_strobe_delay() {
