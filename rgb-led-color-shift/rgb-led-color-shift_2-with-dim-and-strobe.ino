@@ -1,9 +1,9 @@
 
-
 /********************************************************
  * POTENTIAL IMPROVEMENTS                               *
  *                                                      *
  *                                                      *
+ *   - Have a pattern with "uniform" brightness         *
  *   - Use different resistors for each channel,        *
  *     (255, 255, 255) should be neutral white          *
  *     (not very light cyan)                            *
@@ -45,12 +45,12 @@ byte current_rgb[3] = {255, 255, 255};
 
 // holds the index (into pattern_functions) for the current
 // pattern's function pointer
-byte current_pattern_fun_index = 1;
+byte current_pattern_fun_index = 0;
 
 // counter of steps. will overflow. that's ok
 byte counter = 0;
 
-byte check_sensors_about_every = 10;
+byte check_sensors_about_every = 50;
 
 
 
@@ -86,6 +86,7 @@ void write_RGB_colors() {
     analogWrite(RED_LED,   current_rgb[RED_INDEX]);
     analogWrite(GREEN_LED, current_rgb[GREEN_INDEX]);
     analogWrite(BLUE_LED,  current_rgb[BLUE_INDEX]);
+    counter++;
     if (counter % check_sensors_about_every == 0) {
         update_primary_sensor();
         update_secondary_sensor();
